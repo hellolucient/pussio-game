@@ -3,12 +3,6 @@
 import { usePoolBalance } from '@/hooks/usePoolBalance'
 import { useEffect, useState } from 'react'
 
-interface PrizePoolState {
-  timeLeft: number
-  isFlashing: boolean
-  prevBalance: number
-}
-
 const PrizePool = () => {
   const { balance, lastVoteType } = usePoolBalance()
   const [timeLeft, setTimeLeft] = useState(3600)

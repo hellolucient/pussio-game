@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { PUSSIO_TOKEN, getTokenBalance } from '@/lib/token'
+import { getTokenBalance } from '@/lib/token'
 import { Wallet } from '@/types'
 import { PhantomProvider } from '@/types/phantom'
 

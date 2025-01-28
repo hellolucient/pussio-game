@@ -1,7 +1,6 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js'
 import { 
   TOKEN_2022_PROGRAM_ID,
-  Token,
   createTransferCheckedInstruction,
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
@@ -20,15 +19,8 @@ export const PUSSIO_TOKEN = {
   poolWallet: config.pussioToken.poolWallet
 }
 
-// Add transfer fee calculation
+// Fee percent used for logging transfer amounts
 const TRANSFER_FEE_PERCENT = 4 // 4% fee
-const TRANSFER_FEE_BASIS_POINTS = 10000 // 100% = 10000 basis points
-
-// Calculate amount to send including fee
-const getAmountWithFee = (desiredAmount: number) => {
-  // If we want recipient to get X tokens, we need to send X/(1-fee_percent)
-  return Math.ceil(desiredAmount * 10000 / (10000 - (TRANSFER_FEE_PERCENT * 100)))
-}
 
 export const getTokenBalance = async (wallet: any) => {
   try {
@@ -107,7 +99,7 @@ export const sendTokensToPool = async (wallet: any) => {
     // Transfer exactly 100 tokens (4% fee will be deducted automatically)
     const transferAmount = PUSSIO_TOKEN.requiredAmount * Math.pow(10, PUSSIO_TOKEN.decimals)
     console.log('Sending amount:', PUSSIO_TOKEN.requiredAmount)
-    console.log('Pool will receive:', PUSSIO_TOKEN.requiredAmount * 0.96) // 96 after 4% fee
+    console.log('Pool will receive:', PUSSIO_TOKEN.requiredAmount * (1 - TRANSFER_FEE_PERCENT/100)) // Use the constant
 
     transaction.add(
       createTransferCheckedInstruction(
@@ -136,9 +128,9 @@ export const sendTokensToPool = async (wallet: any) => {
     console.log('Vote transaction confirmed:', signature)
     console.log('Transaction link:', `https://solscan.io/tx/${signature}`)
     return true
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending tokens:', error)
-    if ('logs' in error) {
+    if (error && typeof error === 'object' && 'logs' in error) {
       console.error('Transaction logs:', error.logs)
     }
     return false

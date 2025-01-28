@@ -1,11 +1,10 @@
 "use client"
 
-import Link from 'next/link'
 import ImageDisplay from '@/components/game/ImageDisplay'
 import VoteGauge from '@/components/game/VoteGauge'
 import VoteButtons from '@/components/game/VoteButtons'
 import PrizePool from '@/components/game/PrizePool'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useWallet } from '@/contexts/WalletContext'
 
 export default function Home() {

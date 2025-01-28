@@ -5,7 +5,10 @@ import type { WalletContextType, Wallet } from '@/types'
 
 const WalletContext = createContext<WalletContextType>({
   wallet: null,
-  setWallet: () => {}
+  setWallet: () => {
+    // This is intentionally empty
+    return undefined
+  }
 })
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {

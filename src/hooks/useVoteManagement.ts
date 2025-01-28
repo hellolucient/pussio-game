@@ -1,16 +1,6 @@
 import { useState, useEffect } from 'react'
-import { db, storage } from '@/lib/firebase'
-import { 
-  collection, 
-  addDoc, 
-  updateDoc,
-  onSnapshot,
-  query,
-  where,
-  orderBy,
-  limit
-} from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { Vote } from '@/types'
+import { voteStore } from '@/stores/voteStore'
 
 export function useVoteManagement() {
   const [currentVote, setCurrentVote] = useState<Vote | null>(null)
@@ -18,42 +8,51 @@ export function useVoteManagement() {
 
   // Listen to current vote
   useEffect(() => {
-    const q = query(
-      collection(db, 'votes'),
-      where('endTime', '>', Date.now()),
-      orderBy('endTime', 'desc'),
-      limit(1)
-    )
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      if (!snapshot.empty) {
-        setCurrentVote({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Vote)
+    const unsubscribe = voteStore.subscribe((vote) => {
+      if (vote) {
+        // Ensure vote type is correct before setting
+        const validatedVote: Vote = {
+          ...vote,
+          votes: vote.votes.map(v => ({
+            ...v,
+            voteType: v.voteType as 'pussio' | 'not'
+          }))
+        }
+        setCurrentVote(validatedVote)
       } else {
         setCurrentVote(null)
       }
       setIsLoading(false)
     })
 
+    // Initial state
+    const initialVote = voteStore.getCurrentVote()
+    if (initialVote) {
+      const validatedVote: Vote = {
+        ...initialVote,
+        votes: initialVote.votes.map(v => ({
+          ...v,
+          voteType: v.voteType as 'pussio' | 'not'
+        }))
+      }
+      setCurrentVote(validatedVote)
+    }
+    setIsLoading(false)
+
     return unsubscribe
   }, [])
 
-  const createVote = async (image: File, durationMinutes: number, requiredTokens: number) => {
+  const createVote = async (imageUrl: string, durationMinutes: number) => {
     try {
-      // Upload image
-      const imageRef = ref(storage, `votes/${Date.now()}_${image.name}`)
-      await uploadBytes(imageRef, image)
-      const imageUrl = await getDownloadURL(imageRef)
-
-      // Create vote document
       const vote = {
+        id: Date.now().toString(),
         imageUrl,
         startTime: Date.now(),
         endTime: Date.now() + (durationMinutes * 60 * 1000),
-        requiredTokens,
         votes: []
       }
 
-      await addDoc(collection(db, 'votes'), vote)
+      voteStore.setCurrentVote(vote)
       return true
     } catch (error) {
       console.error('Error creating vote:', error)
@@ -61,7 +60,7 @@ export function useVoteManagement() {
     }
   }
 
-  const recordVote = async (voteId: string, wallet: string, voteType: 'pussio' | 'not') => {
+  const recordVote = async (wallet: string, voteType: 'pussio' | 'not') => {
     try {
       const vote = {
         wallet,
@@ -69,9 +68,11 @@ export function useVoteManagement() {
         timestamp: Date.now()
       }
 
-      await updateDoc(doc(db, 'votes', voteId), {
-        votes: arrayUnion(vote)
-      })
+      const currentVote = voteStore.getCurrentVote()
+      if (!currentVote) return false
+
+      currentVote.votes.push(vote)
+      voteStore.setCurrentVote(currentVote)
 
       return true
     } catch (error) {

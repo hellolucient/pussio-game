@@ -17,4 +17,6 @@ export const config = {
   }
 } as const 
 
-export const ADMIN_WALLETS = [process.env.NEXT_PUBLIC_ADMIN_WALLET!] 
+export const ADMIN_WALLETS = process.env.NEXT_PUBLIC_ADMIN_WALLET 
+  ? [process.env.NEXT_PUBLIC_ADMIN_WALLET]
+  : [] 

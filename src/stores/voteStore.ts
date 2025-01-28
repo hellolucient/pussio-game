@@ -15,20 +15,24 @@ interface Vote {
 let currentVote: Vote | null = null
 let listeners: ((vote: Vote | null) => void)[] = []
 
-// Load from localStorage if exists
-try {
-  const saved = localStorage.getItem('currentVote')
-  if (saved) {
-    currentVote = JSON.parse(saved)
+// Only try to load from localStorage in browser environment
+if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem('currentVote')
+    if (saved) {
+      currentVote = JSON.parse(saved)
+    }
+  } catch (e) {
+    console.error('Error loading vote from storage:', e)
   }
-} catch (e) {
-  console.error('Error loading vote from storage:', e)
 }
 
 export const voteStore = {
   setCurrentVote: (vote: Vote | null) => {
     currentVote = vote
-    localStorage.setItem('currentVote', JSON.stringify(vote))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentVote', JSON.stringify(vote))
+    }
     listeners.forEach(listener => listener(vote))
   },
 
