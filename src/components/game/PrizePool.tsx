@@ -4,7 +4,7 @@ import { usePoolBalance } from '@/hooks/usePoolBalance'
 import { useEffect, useState } from 'react'
 
 const PrizePool = () => {
-  const { balance, lastVoteType } = usePoolBalance()
+  const { balance, lastVoteType, isProcessing } = usePoolBalance()
   const [timeLeft, setTimeLeft] = useState(3600)
   const [isFlashing, setIsFlashing] = useState(false)
   const [prevBalance, setPrevBalance] = useState(balance)
@@ -66,6 +66,16 @@ const PrizePool = () => {
           }`}>
             {Math.floor(balance).toLocaleString()} <span className="text-xs">$PUSSIO</span>
           </div>
+
+          {/* Processing Spinner - Make it more visible */}
+          {isProcessing && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm rounded-lg z-10">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 border-3 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm font-medium text-cyan-400">Processing Vote...</span>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center gap-1 text-xs text-cyan-400/80">
             <span>Voting Closes:</span>

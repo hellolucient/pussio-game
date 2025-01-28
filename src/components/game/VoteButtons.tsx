@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react'
 import { hasEnoughTokens, sendTokensToPool, PUSSIO_TOKEN } from '@/lib/token'
 import { voteStore } from '@/stores/voteStore'
 import { Wallet } from '@/types'
+import { usePoolBalance } from '@/hooks/usePoolBalance'
 
 const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
   const [isVoting, setIsVoting] = useState(false)
   const [error, setError] = useState('')
+  const { setIsProcessing } = usePoolBalance()
 
   // Monitor wallet prop changes
   useEffect(() => {
@@ -17,6 +19,7 @@ const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
 
   const handleVote = async (isPussio: boolean) => {
     try {
+      console.log('Starting vote process:', { isPussio, wallet })
       console.log('Vote clicked:', isPussio ? 'PUSSIO' : 'NOT')
       console.log('Wallet instance:', wallet)
 
@@ -27,6 +30,7 @@ const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
       }
 
       setIsVoting(true)
+      setIsProcessing(true)
       setError('')
 
       // Check if user has enough tokens
@@ -44,8 +48,9 @@ const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
       console.log('Send tokens result:', success)
 
       if (success) {
-        voteStore.recordVote(wallet.publicKey.toString(), isPussio ? 'pussio' : 'not')
-        console.log('Vote recorded:', isPussio ? 'PUSSIO' : 'NOT')
+        const result = voteStore.recordVote(wallet.publicKey.toString(), isPussio ? 'pussio' : 'not')
+        console.log('Vote recorded result:', result)
+        console.log('Current vote state after recording:', voteStore.getCurrentVote())
       }
 
     } catch (error) {
@@ -53,6 +58,7 @@ const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
       setError('An error occurred while voting')
     } finally {
       setIsVoting(false)
+      setIsProcessing(false)
     }
   }
 

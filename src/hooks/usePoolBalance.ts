@@ -10,10 +10,18 @@ export interface PoolState {
   balance: number
   lastVoteType?: 'pussio' | 'not'
   lastVoteTime?: number
+  isProcessing: boolean
 }
 
 export function usePoolBalance() {
-  const [poolState, setPoolState] = useState<PoolState>({ balance: 0 })
+  const [poolState, setPoolState] = useState<PoolState>({ 
+    balance: 0,
+    isProcessing: false 
+  })
+
+  const setIsProcessing = (isProcessing: boolean) => {
+    setPoolState(prev => ({ ...prev, isProcessing }))
+  }
 
   // Listen for votes
   useEffect(() => {
@@ -68,5 +76,8 @@ export function usePoolBalance() {
     return () => clearInterval(interval)
   }, [])
 
-  return poolState
+  return {
+    ...poolState,
+    setIsProcessing
+  }
 } 

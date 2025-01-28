@@ -12,26 +12,41 @@ const AdminPanel = () => {
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
   const [duration, setDuration] = useState(60)
-  const [currentVote, setCurrentVote] = useState(voteStore.getCurrentVote())
+  const [currentVote, setCurrentVote] = useState(() => {
+    const initial = voteStore.getCurrentVote()
+    console.log('Initial vote state in admin:', initial)
+    return initial
+  })
   const [voteCounts, setVoteCounts] = useState(voteStore.getVoteCounts())
   const poolState = usePoolBalance()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadedImage, setUploadedImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
 
-  // Check if wallet is authorized
   useEffect(() => {
+    // Add debug logging
+    console.log('Admin wallet addresses:', ADMIN_WALLETS)
+    console.log('Current wallet:', wallet?.publicKey?.toString())
+    console.log('Is authorized:', isAuthorized)
+    console.log('Current vote:', currentVote)
+    console.log('Vote counts:', voteCounts)
+
     if (wallet?.publicKey) {
-      setIsAuthorized(ADMIN_WALLETS.includes(wallet.publicKey.toString()))
+      const isAdmin = ADMIN_WALLETS.includes(wallet.publicKey.toString())
+      setIsAuthorized(isAdmin)
+    } else {
+      setIsAuthorized(false)
     }
   }, [wallet])
 
-  // Subscribe to vote updates
+  // Add vote subscription
   useEffect(() => {
-    return voteStore.subscribe((vote) => {
+    const unsubscribe = voteStore.subscribe((vote) => {
+      console.log('Vote update in admin:', vote)
       setCurrentVote(vote)
       setVoteCounts(voteStore.getVoteCounts())
     })
+    return unsubscribe
   }, [])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -15,12 +15,14 @@ interface Vote {
 let currentVote: Vote | null = null
 let listeners: ((vote: Vote | null) => void)[] = []
 
-// Only try to load from localStorage in browser environment
+// Add initial load logging
 if (typeof window !== 'undefined') {
   try {
     const saved = localStorage.getItem('currentVote')
+    console.log('Initial localStorage check:', saved)
     if (saved) {
       currentVote = JSON.parse(saved)
+      console.log('Loaded initial vote:', currentVote)
     }
   } catch (e) {
     console.error('Error loading vote from storage:', e)
@@ -29,9 +31,14 @@ if (typeof window !== 'undefined') {
 
 export const voteStore = {
   setCurrentVote: (vote: Vote | null) => {
+    console.log('Setting current vote:', vote)
     currentVote = vote
     if (typeof window !== 'undefined') {
-      localStorage.setItem('currentVote', JSON.stringify(vote))
+      try {
+        localStorage.setItem('currentVote', JSON.stringify(vote))
+      } catch (e) {
+        console.error('Error saving vote:', e)
+      }
     }
     listeners.forEach(listener => listener(vote))
   },
@@ -39,7 +46,11 @@ export const voteStore = {
   getCurrentVote: () => currentVote,
 
   recordVote: (wallet: string, type: VoteType) => {
-    if (!currentVote) return false
+    console.log('Recording vote:', { wallet, type })
+    if (!currentVote) {
+      console.log('No current vote to record to')
+      return false
+    }
     
     currentVote.votes.push({
       wallet,
@@ -47,7 +58,14 @@ export const voteStore = {
       timestamp: Date.now()
     })
     
-    localStorage.setItem('currentVote', JSON.stringify(currentVote))
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('currentVote', JSON.stringify(currentVote))
+      } catch (e) {
+        console.error('Error saving vote:', e)
+      }
+    }
+    console.log('Updated vote state:', currentVote)
     listeners.forEach(listener => listener(currentVote))
     return true
   },
