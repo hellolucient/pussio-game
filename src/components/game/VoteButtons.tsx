@@ -9,7 +9,7 @@ import { usePoolBalance } from '@/hooks/usePoolBalance'
 const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
   const [isVoting, setIsVoting] = useState(false)
   const [error, setError] = useState('')
-  const { setIsProcessing } = usePoolBalance()
+  const { setIsProcessing, recordVote } = usePoolBalance()
 
   // Monitor wallet prop changes
   useEffect(() => {
@@ -38,12 +38,13 @@ const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
       console.log('Send tokens result:', success)
 
       if (success) {
-        const voteResult = voteStore.recordVote(
-          wallet.publicKey.toString(), 
-          isPussio ? 'pussio' : 'not'
-        )
-        console.log('Vote recorded result:', voteResult)
-        console.log('Vote state after recording:', voteStore.getCurrentVote())
+        // Record the vote type for color flashing
+        recordVote(isPussio ? 'pussio' : 'not')
+        
+        // Also record in voteStore if there's an active session
+        if (voteStore.getCurrentVote()) {
+          voteStore.recordVote(wallet.publicKey.toString(), isPussio ? 'pussio' : 'not')
+        }
       }
 
     } catch (error) {

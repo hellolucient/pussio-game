@@ -16,31 +16,24 @@ export interface PoolState {
 export function usePoolBalance() {
   const [poolState, setPoolState] = useState<PoolState>({ 
     balance: 0,
-    isProcessing: false 
+    isProcessing: false,
+    lastVoteType: undefined,  // This will be 'pussio' or 'not'
+    lastVoteTime: undefined
   })
 
   const setIsProcessing = (isProcessing: boolean) => {
     setPoolState(prev => ({ ...prev, isProcessing }))
   }
 
-  // Listen for votes with more logging
-  useEffect(() => {
-    console.log('Setting up vote subscription')
-    const unsubscribe = voteStore.subscribe((vote) => {
-      console.log('Vote update in usePoolBalance:', vote)
-      if (vote?.votes.length) {
-        const lastVote = vote.votes[vote.votes.length - 1]
-        console.log('Last vote:', lastVote)
-        
-        setPoolState(prev => ({
-          ...prev,
-          lastVoteType: lastVote.voteType as 'pussio' | 'not',
-          lastVoteTime: lastVote.timestamp
-        }))
-      }
-    })
-    return unsubscribe
-  }, [])
+  // Record vote type for color flash
+  const recordVote = (type: 'pussio' | 'not') => {
+    console.log('Recording vote type for flash:', type)
+    setPoolState(prev => ({
+      ...prev,
+      lastVoteType: type,
+      lastVoteTime: Date.now()
+    }))
+  }
 
   // Poll for balance updates
   useEffect(() => {
@@ -48,8 +41,6 @@ export function usePoolBalance() {
       try {
         const poolPubkey = new PublicKey(PUSSIO_TOKEN.poolWallet)
         const mintPubkey = new PublicKey(PUSSIO_TOKEN.mint)
-
-        // Get token balance
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
           poolPubkey,
           { mint: mintPubkey }
@@ -70,12 +61,13 @@ export function usePoolBalance() {
     }
 
     getPoolBalance()
-    const interval = setInterval(getPoolBalance, 5000)
+    const interval = setInterval(getPoolBalance, 2000)
     return () => clearInterval(interval)
   }, [])
 
   return {
     ...poolState,
-    setIsProcessing
+    setIsProcessing,
+    recordVote
   }
 } 
