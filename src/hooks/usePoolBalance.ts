@@ -23,22 +23,20 @@ export function usePoolBalance() {
     setPoolState(prev => ({ ...prev, isProcessing }))
   }
 
-  // Listen for votes
+  // Listen for votes with more logging
   useEffect(() => {
+    console.log('Setting up vote subscription')
     const unsubscribe = voteStore.subscribe((vote) => {
+      console.log('Vote update in usePoolBalance:', vote)
       if (vote?.votes.length) {
         const lastVote = vote.votes[vote.votes.length - 1]
-        const voteType = lastVote.voteType
+        console.log('Last vote:', lastVote)
         
-        // Only update if we have a valid vote type
-        if (voteType === 'pussio' || voteType === 'not') {
-          setPoolState(prev => ({
-            ...prev,
-            balance: prev.balance,  // Maintain existing balance
-            lastVoteType: voteType,  // TypeScript now knows this is 'pussio' | 'not'
-            lastVoteTime: lastVote.timestamp
-          }))
-        }
+        setPoolState(prev => ({
+          ...prev,
+          lastVoteType: lastVote.voteType as 'pussio' | 'not',
+          lastVoteTime: lastVote.timestamp
+        }))
       }
     })
     return unsubscribe

@@ -20,37 +20,30 @@ const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
   const handleVote = async (isPussio: boolean) => {
     try {
       console.log('Starting vote process:', { isPussio, wallet })
-      console.log('Vote clicked:', isPussio ? 'PUSSIO' : 'NOT')
-      console.log('Wallet instance:', wallet)
-
+      
       if (!wallet || !wallet.isConnected) {
-        console.log('No valid wallet connection')
         setError('Please connect your wallet first')
         return
       }
 
       setIsVoting(true)
       setIsProcessing(true)
-      setError('')
 
-      // Check if user has enough tokens
-      const canVote = await hasEnoughTokens(wallet)
-      console.log('Has enough tokens:', canVote)
-
-      if (!canVote) {
-        setError(`Insufficient balance. ${PUSSIO_TOKEN.requiredAmount} $PUSSIO required to vote.`)
-        return
-      }
+      // Check if there's an active vote
+      const currentVote = voteStore.getCurrentVote()
+      console.log('Current vote before recording:', currentVote)
 
       // Send tokens to pool
-      console.log('Attempting to send tokens...')
       const success = await sendTokensToPool(wallet)
       console.log('Send tokens result:', success)
 
       if (success) {
-        const result = voteStore.recordVote(wallet.publicKey.toString(), isPussio ? 'pussio' : 'not')
-        console.log('Vote recorded result:', result)
-        console.log('Current vote state after recording:', voteStore.getCurrentVote())
+        const voteResult = voteStore.recordVote(
+          wallet.publicKey.toString(), 
+          isPussio ? 'pussio' : 'not'
+        )
+        console.log('Vote recorded result:', voteResult)
+        console.log('Vote state after recording:', voteStore.getCurrentVote())
       }
 
     } catch (error) {
