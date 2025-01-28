@@ -29,15 +29,15 @@ const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
       setIsVoting(true)
       setIsProcessing(true)
 
-      // Record vote type BEFORE sending tokens
-      recordVote(isPussio ? 'pussio' : 'not')
-      console.log('Vote type recorded:', isPussio ? 'pussio' : 'not')
-
       // Send tokens to pool
       const success = await sendTokensToPool(wallet)
       console.log('Send tokens result:', success)
 
       if (success) {
+        console.log('About to emit vote type:', isPussio ? 'pussio' : 'not')
+        recordVote(isPussio ? 'pussio' : 'not')
+        console.log('Vote emitted')
+
         // Record in voteStore if there's an active session
         if (voteStore.getCurrentVote()) {
           voteStore.recordVote(wallet.publicKey.toString(), isPussio ? 'pussio' : 'not')

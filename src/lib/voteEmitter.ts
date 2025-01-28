@@ -16,4 +16,5 @@ class VoteEmitter {
   }
 }
 
+// Make sure we export a singleton instance
 export const voteEmitter = new VoteEmitter() 

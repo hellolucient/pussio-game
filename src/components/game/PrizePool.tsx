@@ -9,17 +9,20 @@ const PrizePool = () => {
   const [timeLeft, setTimeLeft] = useState(3600)
   const [isFlashing, setIsFlashing] = useState(false)
   const [prevBalance, setPrevBalance] = useState(balance)
-  const [flashType, setFlashType] = useState<'pussio' | 'not' | undefined>()
-  const pendingVoteRef = useRef<'pussio' | 'not' | undefined>()
+  const [flashType, setFlashType] = useState<'pussio' | 'not' | undefined>(undefined)
+  const pendingVoteRef = useRef<'pussio' | 'not' | undefined>(undefined)
 
   // Listen for vote events
   useEffect(() => {
-    return voteEmitter.subscribe(type => {
-      console.log('💫 Vote event received:', type)
-      pendingVoteRef.current = type // Store the vote type
+    console.log('Setting up vote event listener')
+    const unsubscribe = voteEmitter.subscribe(type => {
+      console.log('💫 Vote event received in PrizePool:', type)
+      pendingVoteRef.current = type
       setFlashType(type)
       setIsFlashing(true)
     })
+    console.log('Vote listener setup complete')
+    return unsubscribe
   }, [])
 
   // Handle balance changes
