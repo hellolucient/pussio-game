@@ -13,10 +13,13 @@ const PrizePool = () => {
   useEffect(() => {
     if (Math.floor(balance) !== Math.floor(prevBalance)) {
       setIsFlashing(true)
+      // Store the vote type at the time of the flash
+      const voteType = lastVoteType
+      console.log('Flashing for vote type:', voteType) // Debug
       setTimeout(() => setIsFlashing(false), 1000)
       setPrevBalance(balance)
     }
-  }, [balance, prevBalance])
+  }, [balance, prevBalance, lastVoteType])
 
   // Countdown timer
   useEffect(() => {
@@ -42,12 +45,14 @@ const PrizePool = () => {
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
         
-        {/* Flash animation overlay */}
+        {/* Flash animation overlay - Make sure colors match vote type */}
         <div className={`absolute inset-0 transition-colors duration-500 ${
           isFlashing 
             ? lastVoteType === 'not'
-              ? 'bg-rose-500/20'
-              : 'bg-green-500/20'
+              ? 'bg-rose-500/20'  // Red for 'not' votes
+              : lastVoteType === 'pussio'
+                ? 'bg-green-500/20'  // Green only for 'pussio' votes
+                : 'bg-transparent'
             : 'bg-transparent'
         }`} />
 
@@ -60,8 +65,10 @@ const PrizePool = () => {
           <div className={`text-xl font-mono font-bold transition-colors duration-500 ${
             isFlashing
               ? lastVoteType === 'not'
-                ? 'text-rose-400'
-                : 'text-green-400'
+                ? 'text-rose-400'  // Red for 'not' votes
+                : lastVoteType === 'pussio'
+                  ? 'text-green-400'  // Green only for 'pussio' votes
+                  : 'text-cyan-400'
               : 'text-cyan-400'
           }`}>
             {Math.floor(balance).toLocaleString()} <span className="text-xs">$PUSSIO</span>

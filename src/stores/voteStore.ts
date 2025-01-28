@@ -36,14 +36,31 @@ export const voteStore = {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('currentVote', JSON.stringify(vote))
+        console.log('Saved vote to localStorage:', vote)
       } catch (e) {
         console.error('Error saving vote:', e)
       }
     }
-    listeners.forEach(listener => listener(vote))
+    listeners.forEach(listener => {
+      console.log('Notifying listener of vote update')
+      listener(vote)
+    })
   },
 
-  getCurrentVote: () => currentVote,
+  getCurrentVote: () => {
+    // Try to get fresh data from localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('currentVote')
+        if (saved) {
+          currentVote = JSON.parse(saved)
+        }
+      } catch (e) {
+        console.error('Error getting current vote:', e)
+      }
+    }
+    return currentVote
+  },
 
   recordVote: (wallet: string, type: VoteType) => {
     console.log('Recording vote:', { wallet, type })
@@ -52,19 +69,34 @@ export const voteStore = {
       return false
     }
     
-    currentVote.votes.push({
+    // Create a new vote object
+    const vote = {
       wallet,
       voteType: type,
       timestamp: Date.now()
-    })
+    }
+
+    // Create a new array with the existing votes plus the new one
+    const updatedVotes = [...currentVote.votes, vote]
+    
+    // Create a new vote state
+    const updatedVote = {
+      ...currentVote,
+      votes: updatedVotes
+    }
+
+    // Update the store
+    currentVote = updatedVote
     
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('currentVote', JSON.stringify(currentVote))
+        console.log('Saved updated vote to localStorage:', currentVote)
       } catch (e) {
         console.error('Error saving vote:', e)
       }
     }
+
     console.log('Updated vote state:', currentVote)
     listeners.forEach(listener => listener(currentVote))
     return true
