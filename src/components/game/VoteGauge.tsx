@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 const VoteGauge = () => {
-  const [position, setPosition] = useState(50) // 0-100 scale
+  const [position, setPosition] = useState<number>(50) // 0-100 scale
   const [isAnimating, setIsAnimating] = useState(false)
   
   // Simulate random fluctuations

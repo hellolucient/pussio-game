@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { hasEnoughTokens, sendTokensToPool, PUSSIO_TOKEN } from '@/lib/token'
 import { voteStore } from '@/stores/voteStore'
+import { Wallet } from '@/types'
 
-const VoteButtons = ({ wallet }: { wallet: any }) => {
+const VoteButtons = ({ wallet }: { wallet: Wallet | null }) => {
   const [isVoting, setIsVoting] = useState(false)
   const [error, setError] = useState('')
 

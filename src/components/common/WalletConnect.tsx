@@ -2,25 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { PUSSIO_TOKEN, getTokenBalance } from '@/lib/token'
-
-// Add type declaration for phantom
-declare global {
-  interface Window {
-    phantom?: {
-      solana?: any
-    }
-  }
-}
+import { Wallet } from '@/types'
+import { PhantomProvider } from '@/types/phantom'
 
 interface WalletConnectProps {
-  wallet: any
-  onWalletChange?: (wallet: any) => void
+  wallet: Wallet | null
+  onWalletChange: (wallet: Wallet | null) => void
 }
 
-const WalletConnect = ({ wallet, onWalletChange = () => {} }: WalletConnectProps) => {
+const WalletConnect = ({ wallet, onWalletChange }: WalletConnectProps) => {
   const [publicKey, setPublicKey] = useState('')
   const [balance, setBalance] = useState(0)
-  const [phantom, setPhantom] = useState<any>(null)
+  const [phantom, setPhantom] = useState<PhantomProvider['solana'] | null>(null)
 
   // Initialize Phantom
   useEffect(() => {
@@ -48,7 +41,7 @@ const WalletConnect = ({ wallet, onWalletChange = () => {} }: WalletConnectProps
     }
   }, [wallet])
 
-  const updateBalance = async (currentWallet: any) => {
+  const updateBalance = async (currentWallet: Wallet) => {
     if (currentWallet?.isConnected) {
       try {
         const balance = await getTokenBalance(currentWallet)

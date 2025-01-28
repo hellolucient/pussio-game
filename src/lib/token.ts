@@ -12,7 +12,13 @@ import { config } from '@/config/env'
 // Use Helius RPC from config
 const connection = new Connection(config.rpcUrl)
 
-export const PUSSIO_TOKEN = config.pussioToken
+export const PUSSIO_TOKEN = {
+  mint: config.pussioToken.mint,
+  symbol: config.pussioToken.symbol,
+  decimals: config.pussioToken.decimals,
+  requiredAmount: config.pussioToken.requiredAmount,
+  poolWallet: config.pussioToken.poolWallet
+}
 
 // Add transfer fee calculation
 const TRANSFER_FEE_PERCENT = 4 // 4% fee
@@ -24,7 +30,7 @@ const getAmountWithFee = (desiredAmount: number) => {
   return Math.ceil(desiredAmount * 10000 / (10000 - (TRANSFER_FEE_PERCENT * 100)))
 }
 
-export async function getTokenBalance(wallet: any) {
+export const getTokenBalance = async (wallet: any) => {
   try {
     const publicKey = new PublicKey(wallet.publicKey.toString())
     const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
@@ -46,12 +52,12 @@ export async function getTokenBalance(wallet: any) {
   }
 }
 
-export async function hasEnoughTokens(wallet: any): Promise<boolean> {
+export const hasEnoughTokens = async (wallet: any): Promise<boolean> => {
   const balance = await getTokenBalance(wallet)
   return balance >= PUSSIO_TOKEN.requiredAmount
 }
 
-export async function sendTokensToPool(wallet: any) {
+export const sendTokensToPool = async (wallet: any) => {
   try {
     console.log('Creating token transfer...')
     

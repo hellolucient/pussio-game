@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Connection, PublicKey } from '@solana/web3.js'
-import { getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { PUSSIO_TOKEN } from '@/lib/token'
 import { config } from '@/config/env'
 import { voteStore } from '@/stores/voteStore'
