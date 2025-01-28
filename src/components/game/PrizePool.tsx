@@ -1,28 +1,40 @@
 "use client"
 
 import { usePoolBalance } from '@/hooks/usePoolBalance'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { voteEmitter } from '@/lib/voteEmitter'
 
 const PrizePool = () => {
-  const { balance, lastVoteType, isProcessing } = usePoolBalance()
+  const { balance, isProcessing } = usePoolBalance()
   const [timeLeft, setTimeLeft] = useState(3600)
   const [isFlashing, setIsFlashing] = useState(false)
   const [prevBalance, setPrevBalance] = useState(balance)
-  const [currentVoteType, setCurrentVoteType] = useState<'pussio' | 'not' | null>(null)
+  const [flashType, setFlashType] = useState<'pussio' | 'not' | undefined>()
+  const pendingVoteRef = useRef<'pussio' | 'not' | undefined>()
 
-  // Handle balance changes with flash animation
+  // Listen for vote events
+  useEffect(() => {
+    return voteEmitter.subscribe(type => {
+      console.log('💫 Vote event received:', type)
+      pendingVoteRef.current = type // Store the vote type
+      setFlashType(type)
+      setIsFlashing(true)
+    })
+  }, [])
+
+  // Handle balance changes
   useEffect(() => {
     if (Math.floor(balance) !== Math.floor(prevBalance)) {
-      console.log('Balance changed, triggering flash with type:', lastVoteType)
-      setIsFlashing(true)
-      setCurrentVoteType(lastVoteType || null)
-      setTimeout(() => {
-        setIsFlashing(false)
-        setCurrentVoteType(null)
-      }, 1000)
+      console.log('💰 Balance updated, clearing flash state')
       setPrevBalance(balance)
+      // Only clear the flash if this balance change matches our pending vote
+      if (pendingVoteRef.current) {
+        setIsFlashing(false)
+        setFlashType(undefined)
+        pendingVoteRef.current = undefined
+      }
     }
-  }, [balance, prevBalance, lastVoteType])
+  }, [balance, prevBalance])
 
   // Countdown timer
   useEffect(() => {
@@ -48,14 +60,12 @@ const PrizePool = () => {
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
         
-        {/* Flash animation overlay - Make sure colors match vote type */}
+        {/* Flash animation overlay */}
         <div className={`absolute inset-0 transition-colors duration-500 ${
           isFlashing 
-            ? currentVoteType === 'not'
-              ? 'bg-rose-500/20'  // Red for 'not' votes
-              : currentVoteType === 'pussio'
-                ? 'bg-green-500/20'  // Green only for 'pussio' votes
-                : 'bg-transparent'
+            ? flashType === 'not'
+              ? 'bg-rose-500/30'  // Red for 'not' votes
+              : 'bg-green-500/30' // Green for 'pussio' votes
             : 'bg-transparent'
         }`} />
 
@@ -67,11 +77,9 @@ const PrizePool = () => {
           
           <div className={`text-xl font-mono font-bold transition-colors duration-500 ${
             isFlashing
-              ? currentVoteType === 'not'
-                ? 'text-rose-400'  // Red for 'not' votes
-                : currentVoteType === 'pussio'
-                  ? 'text-green-400'  // Green only for 'pussio' votes
-                  : 'text-cyan-400'
+              ? flashType === 'not'
+                ? 'text-rose-400'
+                : 'text-green-400'
               : 'text-cyan-400'
           }`}>
             {Math.floor(balance).toLocaleString()} <span className="text-xs">$PUSSIO</span>

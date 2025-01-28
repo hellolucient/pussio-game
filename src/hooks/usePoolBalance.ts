@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Connection, PublicKey } from '@solana/web3.js'
 import { PUSSIO_TOKEN } from '@/lib/token'
 import { config } from '@/config/env'
 import { voteStore } from '@/stores/voteStore'
+import { voteEmitter } from '@/lib/voteEmitter'
 
 const connection = new Connection(config.rpcUrl)
 
@@ -17,7 +18,7 @@ export function usePoolBalance() {
   const [poolState, setPoolState] = useState<PoolState>({ 
     balance: 0,
     isProcessing: false,
-    lastVoteType: undefined,  // This will be 'pussio' or 'not'
+    lastVoteType: undefined,
     lastVoteTime: undefined
   })
 
@@ -25,14 +26,9 @@ export function usePoolBalance() {
     setPoolState(prev => ({ ...prev, isProcessing }))
   }
 
-  // Record vote type for color flash
   const recordVote = (type: 'pussio' | 'not') => {
-    console.log('Recording vote type for flash:', type)
-    setPoolState(prev => ({
-      ...prev,
-      lastVoteType: type,
-      lastVoteTime: Date.now()
-    }))
+    console.log('🎯 Recording vote type:', type)
+    voteEmitter.emit(type)
   }
 
   // Poll for balance updates
@@ -48,11 +44,11 @@ export function usePoolBalance() {
 
         if (tokenAccounts.value.length > 0) {
           const rawBalance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.amount
-          const balance = Number(rawBalance) / Math.pow(10, PUSSIO_TOKEN.decimals)
+          const newBalance = Number(rawBalance) / Math.pow(10, PUSSIO_TOKEN.decimals)
           
           setPoolState(prev => ({
             ...prev,
-            balance
+            balance: newBalance
           }))
         }
       } catch (error) {
