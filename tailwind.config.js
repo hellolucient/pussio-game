@@ -30,6 +30,16 @@ module.exports = {
           },
         },
       },
+      backgroundImage: {
+        'wall1': "url('/images/wall1.png')",
+        'wall2': "url('/images/wall2.png')",
+        'wall3': "url('/images/wall3.png')",
+        'wall4': "url('/images/wall4.png')",
+        'wall5': "url('/images/wall5.png')",
+      },
+      perspective: {
+        '1000': '1000px',
+      },
     },
   },
   plugins: [],

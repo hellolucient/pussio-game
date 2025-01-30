@@ -12,10 +12,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-900 text-white min-h-screen`}>
+      <body className={`${inter.className} text-white min-h-screen w-screen overflow-x-hidden bg-black`}>
         <WalletProvider>
           <Header />
-          <main className="pt-16 min-h-screen">
+          <main className="min-h-screen">
             {children}
           </main>
         </WalletProvider>

@@ -1,88 +1,99 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import ImageDisplay from '@/components/game/ImageDisplay'
 import VoteGauge from '@/components/game/VoteGauge'
 import VoteButtons from '@/components/game/VoteButtons'
 import PrizePool from '@/components/game/PrizePool'
-import { useEffect } from 'react'
+import LandingPage from '@/components/landing/LandingPage'
 import { useWallet } from '@/contexts/WalletContext'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 
 export default function Home() {
   const { wallet } = useWallet()
+  const [showLanding, setShowLanding] = useState(true)
 
   // Debug wallet state changes
   useEffect(() => {
     console.log('Current wallet state in page:', wallet)
   }, [wallet])
 
+  if (showLanding) {
+    return <LandingPage onComplete={() => setShowLanding(false)} />
+  }
+
   return (
-    <div className="h-screen flex flex-col">
-      {/* Hero Section - Even More Compact */}
-      <section className="pt-6 pb-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-1">
-            <h1 className="text-3xl md:text-5xl font-bold">
-              <span className="bg-gradient-to-r from-cyan-400 to-pink-400 text-transparent bg-clip-text">
-                PUSSIO or NOT?
-              </span>
-            </h1>
-            <p className="text-base md:text-lg text-gray-300 max-w-2xl mx-auto">
-              Vote to Win - Stake to Earn
-            </p>
-          </div>
-        </div>
-      </section>
+    <motion.div 
+      className="min-h-screen w-screen relative overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ 
+        duration: 1,
+        ease: "easeInOut" 
+      }}
+    >
+      {/* Background */}
+      <div className="fixed inset-0 w-screen h-screen">
+        <div className="absolute inset-0 w-full h-full bg-wall1 bg-cover" />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/50" />
+      </div>
 
-      {/* PUSSIO PORTAL Section */}
-      <section className="flex-1 relative flex items-start py-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          {/* Portal Frame */}
-          <div className="relative mx-auto max-w-2xl aspect-[3/2]">
-            {/* Background Glow */}
-            <div className="absolute inset-0 bg-purple-900/30 blur-3xl transform -translate-y-1/2" />
-            
-            {/* Main Portal Container */}
-            <div className="relative h-full bg-gradient-to-b from-transparent via-purple-900/50 to-purple-900/80 backdrop-blur-sm rounded-[40px] border border-pink-500/20 overflow-hidden">
-              {/* Beam Effect */}
-              <div className="absolute inset-x-0 bottom-0 w-full">
-                {/* Base Platform */}
-                <div className="absolute bottom-0 w-full h-20 bg-gradient-to-t from-cyan-500/30 to-transparent blur-sm" />
+      {/* Content */}
+      <div className="relative z-10 w-full">
+        {/* Hero Section */}
+        <section className="pt-20 pb-10">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="text-center">
+              {/* Add wrapper div for effects */}
+              <div className="relative">
+                {/* Enhanced pulsing glow effect */}
+                <div className="absolute inset-0 blur-3xl bg-green-500/40 animate-glow-pulse" />
                 
-                {/* Animated Beam */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-[500px]">
-                  <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/50 via-pink-500/30 to-transparent animate-pulse" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/30 via-pink-500/20 to-transparent blur-xl animate-pulse" />
+                {/* Noise overlay */}
+                <div className="absolute inset-0 bg-noise opacity-20 mix-blend-overlay" />
+                
+                {/* Main logo */}
+                <div className="relative h-36 md:h-48">
+                  <Image
+                    src="/images/PUSSIO.png"
+                    alt="PUSSIO or NOT?"
+                    fill
+                    className="object-contain drop-shadow-[0_0_25px_rgba(34,197,94,0.7)]"
+                    priority
+                  />
                 </div>
               </div>
-
-              {/* Current Image Container */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%]">
-                <div className="relative w-full h-full">
-                  <ImageDisplay />
-                </div>
-              </div>
-
-              {/* Tech Details */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-6 py-2 bg-black/30 rounded-full backdrop-blur-sm border border-pink-500/20">
-                <span className="text-sm text-cyan-400 font-mono">ROUND #1</span>
-              </div>
-
-              {/* Prize Pool Display - Added below round number */}
-              <PrizePool />
-
-              {/* Side Decorations */}
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 w-1 h-32 bg-gradient-to-b from-transparent via-pink-500/50 to-transparent" />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1 h-32 bg-gradient-to-b from-transparent via-pink-500/50 to-transparent" />
             </div>
           </div>
+        </section>
 
-          {/* Vote Controls */}
-          <div className="py-0.5 space-y-1">
-            <VoteButtons wallet={wallet} />
-            <VoteGauge />
+        {/* Game Section */}
+        <section className="relative py-10">
+          <div className="max-w-4xl mx-auto px-4">
+            {/* Image Frame - with enhanced blur effect */}
+            <div className="relative mx-auto aspect-[3/2] bg-black/40 rounded-2xl overflow-hidden backdrop-blur-md border border-cyan-500/20">
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-900/10 to-cyan-900/20" />
+              
+              {/* Image Display */}
+              <div className="relative h-full">
+                <ImageDisplay />
+              </div>
+
+              {/* Prize Pool */}
+              <PrizePool />
+            </div>
+
+            {/* Controls */}
+            <div className="mt-8 space-y-6">
+              <VoteButtons wallet={wallet} />
+              <VoteGauge />
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </motion.div>
   )
 }
