@@ -40,9 +40,9 @@ const VoteGauge = () => {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-2">
+    <div className="w-full max-w-md mx-auto space-y-1 md:space-y-2">
       {/* Gauge Bar */}
-      <div className="h-6 bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm p-1">
+      <div className="h-4 md:h-6 bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm p-1">
         <div className="relative h-full w-full rounded-full overflow-hidden">
           {/* Background gradient - reversed colors */}
           <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-red-500" />
@@ -71,7 +71,7 @@ const VoteGauge = () => {
       </div>
 
       {/* Labels */}
-      <div className="flex justify-between text-xs font-bold">
+      <div className="flex justify-between text-xs md:text-sm font-bold">
         <div className="text-green-400">PUSSIO</div>
         <div className="text-red-400">BOSS</div>
       </div>
