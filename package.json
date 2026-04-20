@@ -12,7 +12,7 @@
     "@solana/spl-token": "^0.4.9",
     "@solana/web3.js": "^1.98.0",
     "framer-motion": "^12.0.6",
-    "next": "14.1.0",
+    "next": "14.2.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
